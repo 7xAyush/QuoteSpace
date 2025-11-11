@@ -1,4 +1,4 @@
-﻿{
+{
     "name":  "com.quotespace.app",
     "version":  "0.0.1",
     "private":  true,
@@ -36,3 +36,4 @@
                     "node":  "\u003e=16"
                 }
 }
+
