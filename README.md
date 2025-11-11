@@ -82,6 +82,7 @@ A clean React Native app that shows daily motivational quotes with favorites, sh
 ## Features
 - Daily quote with local caching (per-category, persists for the day)
 - Category chips (inspirational, success, life, love, etc.)
+  - Chips are shown when an API Ninjas key is set; otherwise the app uses a general daily quote fallback.
 - Favorite/unfavorite quotes (AsyncStorage)
 - Favorites list with search, share, and clear-all
 - Gradient background, fade transitions, and typewriter quote animation

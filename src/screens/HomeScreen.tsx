@@ -17,7 +17,7 @@ import {Quote} from '../types/quote';
 import QuoteCard from '../components/QuoteCard';
 import {colors} from '../theme/colors';
 import {getSelectedCategory, setSelectedCategory} from '../storage/prefs';
-import {QUOTE_CATEGORY} from '../config';
+import {QUOTE_CATEGORY, API_NINJAS_KEY} from '../config';
 
 export default function HomeScreen() {
   const [loading, setLoading] = useState(true);
@@ -26,6 +26,10 @@ export default function HomeScreen() {
   const [error, setError] = useState<string | null>(null);
   const [category, setCategory] = useState<string | undefined>(undefined);
   const catAnim = useRef(new Animated.Value(1)).current;
+  const hasApiKey = useMemo(
+    () => typeof API_NINJAS_KEY === 'string' && API_NINJAS_KEY.trim().length > 0,
+    [],
+  );
 
   const categories = useMemo(
     () => [
@@ -78,14 +82,19 @@ export default function HomeScreen() {
   }, [category]);
 
   useEffect(() => {
-    // initialize selected category from prefs or config
+    // initialize selected category only if API Ninjas key is present
     (async () => {
-      const saved = await getSelectedCategory();
-      const initial = saved ?? QUOTE_CATEGORY ?? 'inspirational';
-      setCategory(initial);
-      await loadDaily(initial);
+      if (hasApiKey) {
+        const saved = await getSelectedCategory();
+        const initial = saved ?? QUOTE_CATEGORY ?? 'inspirational';
+        setCategory(initial);
+        await loadDaily(initial);
+      } else {
+        setCategory(undefined);
+        await loadDaily(undefined);
+      }
     })();
-  }, [loadDaily]);
+  }, [loadDaily, hasApiKey]);
 
   const onFavorite = useCallback(async () => {
     if (!quote) return;
@@ -125,18 +134,20 @@ export default function HomeScreen() {
       <StatusBar barStyle="light-content" />
       <ScrollView contentContainerStyle={styles.container}>
         <Text style={styles.title}>QuoteSpace</Text>
-        <View style={styles.chipsRow}>
-          {categories.map(c => (
-            <Pressable
-              key={c}
-              onPress={() => onSelectCategory(c)}
-              style={[styles.chip, category === c && styles.chipActive]}>
-              <Text style={[styles.chipText, category === c && styles.chipTextActive]}>
-                {c}
-              </Text>
-            </Pressable>
-          ))}
-        </View>
+        {hasApiKey && (
+          <View style={styles.chipsRow}>
+            {categories.map(c => (
+              <Pressable
+                key={c}
+                onPress={() => onSelectCategory(c)}
+                style={[styles.chip, category === c && styles.chipActive]}>
+                <Text style={[styles.chipText, category === c && styles.chipTextActive]}>
+                  {c}
+                </Text>
+              </Pressable>
+            ))}
+          </View>
+        )}
         <Animated.View
           style={{
             opacity: catAnim,
